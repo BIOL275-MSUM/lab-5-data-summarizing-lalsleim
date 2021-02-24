@@ -1,0 +1,125 @@
+---
+title: "Lab 5 Assignment"
+author: "Lara Al Selim"
+date: "2021-02-23"
+output: github_document
+---
+
+```{r message=FALSE}
+library(tidyverse)
+iris <- as_tibble(iris) # so it prints a little nicer
+```
+
+## QUESTION ONE
+
+Rename each variable so that it is all lower-case and uses an underscore _ instead of a period . in the name (the recommended coding style in the tidyverse style guide). Print the resulting table.
+
+```{r}
+rename(
+  iris,
+  sepal_length = Sepal.Length,
+  sepal_width = Sepal.Width,
+  petal_length = Petal.Length,
+  petal_width = Petal.Width
+)
+
+```
+
+## QUESTION TWO
+
+Convert the four numerical variables from cm to mm by multiplying by 10. Print the resulting table.
+
+```{r}
+mutate(
+  iris,
+  Sepal.Length = Sepal.Length * 10,
+  Sepal.Width = Sepal.Width * 10,
+  Petal.Length = Petal.Length * 10,
+  Petal.Width = Petal.Width * 10
+)
+```
+
+## QUESTION THREE
+
+Calculate sepal area and petal area (area is equal to length multiplied by width). Print a table with only the variables sepal area, petal area, and species.
+
+```{r}
+iris_area <- 
+mutate(iris,
+       Sepal_area = Sepal.Length * Sepal.Width,
+       petal_area = Petal.Length * Petal.Width)
+select(iris_area,Sepal_area,petal_area)
+```
+
+## QUESTION FOUR
+
+Calculate the following statistics for the entire dataset from the sepal length variable and print the resulting table:
+
+```{r}
+summarize(
+  iris,
+  sampl_size = n(),
+  max = max(Sepal.Length),
+  min = min(Sepal.Length),
+  range = max-min,
+  median = median(Sepal.Length),
+  q1 = quantile(Sepal.Length, probs=0.25),
+  q3 = quantile(Sepal.Length, probs=0.75),
+  iqr = IQR(Sepal.Length)
+)
+```
+
+## QUESTION FIVE
+
+Calculate the following statistics for each species from the petal width variable and print the resulting table:
+
+```{r}
+iris_grouped <- group_by(iris,Species)
+iris_grouped
+
+iris_summarised<-
+summarise(
+  iris_grouped,
+  sample_size = n(),
+  mean = mean(Petal.Width),
+  sd = sd(Petal.Width),
+  var = var(Petal.Width),
+  stderr = sd / sqrt(sample_size),
+  ci_upper = mean + 2 * stderr,
+  ci_lower = mean - 2 * stderr
+)
+iris_summarised
+```
+
+## QUESTION SIX
+
+Visualize the relationship between petal width and species using a strip plot.
+
+```{r}
+ggplot(data=iris)+geom_jitter(aes(y=Petal.Length,x=Species))
+
+```
+
+## QUESTION SEVEN
+
+Starting with the previous graph, add the mean and 95% confidence interval for each species
+
+```{r}
+ggplot(data=iris)+geom_jitter(aes(y=Petal.Width,x=Species, color=Species)) +
+geom_crossbar(
+  data = iris_summarised, 
+  mapping = aes(x = Species, y = mean, ymax = ci_upper, 
+                ymin = ci_lower),
+  color = "red"
+)
+```
+
+## QUESTION EIGHT
+
+Visualize the relationship between petal length, petal width, and species using a scatterplot. Map the two numerical variables to the x and y axes and map species to the color and shape aesthetics.
+
+```{r}
+ggplot(data = iris) +
+  geom_point(mapping = aes(x = Petal.Length , y = Petal.Width, color = Species))
+```
+
